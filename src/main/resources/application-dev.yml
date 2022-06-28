@@ -1,0 +1,20 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: nms-fault-management
+          uri: http://192.168.101.187:11000
+          predicates:
+            - Path= /nms/api/**
+
+app:
+  basedir: /home/nms/MSA/
+
+logging:
+  level:
+    com: debug
+    org: debug
+
+  file:
+    name: ${logging.file.path}/${service.name:${spring.application.name}}/service.log
+    path: ${app.basedir}/log/${spring.application.name}

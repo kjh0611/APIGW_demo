@@ -1,0 +1,88 @@
+spring:
+  cloud:
+    gateway:
+      default-filters:
+        - name: GlobalFilter
+          args:
+            baseMessage: SCG Global Filter test
+            preLogger: true
+            postLogger: true
+          filters:
+            - TokenRelay=
+      routes:
+        - id: nms-fault-management
+          uri: http://192.168.101.187:11000
+          predicates:
+            - Path= /nms/api/**
+          filters:
+            - TokenRelay=
+        - id: keycloak-api
+          uri: http://192.168.101.188:8389
+          predicates:
+            - Path=/realms/P-NMS/**
+  #          filters:
+  #            - TokenRelay=
+
+        #Circuit Breaker
+        - id: consumer-circuit-breaker
+          uri: lb://consumer
+          predicates:
+            - Path=/cb/**
+          filters:
+            - RewritePath=/.*/(?<param>.*), /delay/${param}
+            - name: CircuitBreaker
+              args:
+                name: mycb
+                fallbackUri: forward:/fallback    # fallback은 Circuit 상태와 상관 없이, fail조건에 해당된 경우 호출됨
+          metadata:
+            connect-timeout: 2500
+            response-timeout: 2500
+
+# Resilience4J
+resilience4j:
+  circuitbreaker:
+    default:
+      # 최근 10개 요청 중 응답속도가 1초 초과한 비율이 70% 이상일때 Circuit Breaker OPEN
+      # 단, 5개 요청까지는 OPEN하지 않음. http timeout정책은 resilience.circuitbreaker.timeout 참조
+      # slowCallDurationThreshold값은 http timeout시간보다 작아야 제대로 동작함. 크면, timeout이 먼저 발생하므로 의미가 없음.
+      slidingWindowType: COUNT_BASED           # default: COUNT_BASED
+      slidingWindowSize: 10                    # default: 100
+      minimumNumberOfCalls: 5                  # default: 100
+      failureRateThreshold: 50                 # default: 50
+      waitDurationInOpenState: 30000           # default: 60000
+
+
+
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://192.168.101.188:8389/realms/P-NMS
+        registration:
+          web:
+            provider: keycloak
+            client-id: pnmsrestfulapp
+            client-secret: NDE8ssWonQJlujXKzeG69DdaNaTTZVI9
+            authorization-grant-type: authorization_code
+            #            scope:
+            #              - email
+            #              - profile
+            redirect-uri: http://localhost:20001/login/oauth2/code/web
+      resourceserver:
+        jwt:
+          jwk-set-uri:  http://192.168.101.188:8389/realms/P-NMS/protocol/openid-connect/certs
+
+server:
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.jks
+    key-alias: apigw
+    key-store-password: testapigw
+    key-store-type: jks
+
+
+logging:
+  level:
+    com: debug
+    org: debug
