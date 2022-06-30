@@ -16,6 +16,7 @@ public class WebClientConfig {
 
     @Bean
     public WebClient webClient() {
+        // 이부분 변경하기
         HttpClient httpClient = HttpClient.create();
 
         //Memory 조정: 2M (default 256KB)

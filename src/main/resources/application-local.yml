@@ -24,32 +24,32 @@ spring:
   #            - TokenRelay=
 
         #Circuit Breaker
-        - id: consumer-circuit-breaker
-          uri: lb://consumer
-          predicates:
-            - Path=/cb/**
-          filters:
-            - RewritePath=/.*/(?<param>.*), /delay/${param}
-            - name: CircuitBreaker
-              args:
-                name: mycb
-                fallbackUri: forward:/fallback    # fallback은 Circuit 상태와 상관 없이, fail조건에 해당된 경우 호출됨
-          metadata:
-            connect-timeout: 2500
-            response-timeout: 2500
+#        - id: consumer-circuit-breaker
+#          uri: lb://consumer
+#          predicates:
+#            - Path=/cb/**
+#          filters:
+#            - RewritePath=/.*/(?<param>.*), /delay/${param}
+#            - name: CircuitBreaker
+#              args:
+#                name: mycb
+#                fallbackUri: forward:/fallback    # fallback은 Circuit 상태와 상관 없이, fail조건에 해당된 경우 호출됨
+#          metadata:
+#            connect-timeout: 2500
+#            response-timeout: 2500
 
 # Resilience4J
-resilience4j:
-  circuitbreaker:
-    default:
-      # 최근 10개 요청 중 응답속도가 1초 초과한 비율이 70% 이상일때 Circuit Breaker OPEN
-      # 단, 5개 요청까지는 OPEN하지 않음. http timeout정책은 resilience.circuitbreaker.timeout 참조
-      # slowCallDurationThreshold값은 http timeout시간보다 작아야 제대로 동작함. 크면, timeout이 먼저 발생하므로 의미가 없음.
-      slidingWindowType: COUNT_BASED           # default: COUNT_BASED
-      slidingWindowSize: 10                    # default: 100
-      minimumNumberOfCalls: 5                  # default: 100
-      failureRateThreshold: 50                 # default: 50
-      waitDurationInOpenState: 30000           # default: 60000
+#resilience4j:
+#  circuitbreaker:
+#    default:
+#      # 최근 10개 요청 중 응답속도가 1초 초과한 비율이 70% 이상일때 Circuit Breaker OPEN
+#      # 단, 5개 요청까지는 OPEN하지 않음. http timeout정책은 resilience.circuitbreaker.timeout 참조
+#      # slowCallDurationThreshold값은 http timeout시간보다 작아야 제대로 동작함. 크면, timeout이 먼저 발생하므로 의미가 없음.
+#      slidingWindowType: COUNT_BASED           # default: COUNT_BASED
+#      slidingWindowSize: 10                    # default: 100
+#      minimumNumberOfCalls: 5                  # default: 100
+#      failureRateThreshold: 50                 # default: 50
+#      waitDurationInOpenState: 30000           # default: 60000
 
 
 

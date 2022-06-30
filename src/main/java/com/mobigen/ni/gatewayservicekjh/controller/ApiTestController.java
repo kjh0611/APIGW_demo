@@ -12,6 +12,9 @@ import reactor.core.publisher.Mono;
 public class ApiTestController {
 
     @Autowired
+    private TestFeign testFeign;
+
+    @Autowired
     private WebClientConfig webClient;
 
     @GetMapping("/webClientTest")
